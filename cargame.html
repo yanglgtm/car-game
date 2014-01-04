@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CarGame</title>
+<style type="text/css">
+body{
+	background-color:#fff;
+	padding:0px;
+	margin:0px;
+}
+#bg{
+	background-color:#eee;
+	width:240px;
+	height:350px;
+	
+}
+#start{
+	background-color:#eee;
+	width:240px;
+	height:390px;
+	position:absolute;
+	z-index:1;
+}
+#over{
+	background-color:#eee;
+	width:240px;
+	height:390px;
+	display:none;
+	position:absolute;
+	z-index:1;
+}
+.btn{
+	background-color:#B91D47;
+	width:100px;
+	color:#f9f9f9;
+	margin:0px;
+}
+.ys{
+	margin-top:50px;
+	font-size:12px;
+	text-align:center;
+}
+.za{
+	width:20px;
+	height:20px;
+	position:absolute;
+}
+.tree{
+	width:40px;
+	height:350px;
+	position:absolute;
+	overflow:hidden;
+	top:0px;
+	z-index:-1;
+}
+#tree2{
+	left:200px;
+}
+#car{
+	width:20px;
+	height:20px;
+	position:absolute;
+	top:330px;
+	left:120px;
+}
+table{
+	border-color:#eee;
+	width:150px;
+	height:100px;
+}
+</style>
+</head>
+<body>
+	<div id="bg">
+	<div id="start">
+		<div class="ys">
+			<span>谨以此游戏，纪念我们逝去的童年</span><br/><br/>
+			<button onclick="start()" class="btn">start (enter)</button><br/><br/>
+			<span>游戏排名</span><br/><br/>
+			<div id="list"><img src="./gamepic/loader.gif"/></div><br/>
+			<span>made by mikej</span>
+		</div>
+	</div>
+	<div id="over">
+		<div class="ys">
+			<span>厉害厉害，您的得分是：<b><span id="score1" style="color:#B91D47;"></span></b></span><br/>
+			<span>请输入你的大名：<input type="text" size="10" name="name" id="name"/></span><br/>
+			
+			<button onclick="upload()" class="btn">上传成绩</button><br/>
+			<button onclick="start()" class="btn">restart</button><br/><br/>
+			
+			<span id="paim"><img src="./gamepic/loader.gif"/></span><br/>
+		</div>
+	</div>
+	<div class="tree" id="tree1"><img src="./gamepic/tree.jpg" width="40" height="500"/></div>
+	<div class="za" id="za1" style="display:none;"></div>
+	<div class="za" id="za2" style="display:none;"></div>
+	<div class="za" id="za3" style="display:none;"></div>
+	<div class="za" id="za4" style="display:none;"></div>
+	<div class="za" id="za5" style="display:none;"></div>
+	<div class="za" id="za6" style="display:none;"></div>
+	<div class="za" id="za7" style="display:none;"></div>
+	<div class="za" id="za8" style="display:none;"></div>
+	<div class="za" id="za9" style="display:none;"></div>
+	<div class="za" id="za10" style="display:none;"></div>
+	<div class="za" id="za11" style="display:none;"></div>
+	<div class="za" id="za12" style="display:none;"></div>
+	<div class="za" id="za13" style="display:none;"></div>
+	<div class="za" id="za14" style="display:none;"></div>
+	<div class="za" id="za15" style="display:none;"></div>
+	<div class="za" id="za16" style="display:none;"></div>
+	<div class="za" id="za17" style="display:none;"></div>
+	<div class="za" id="za18" style="display:none;"></div>
+	<div class="za" id="za19" style="display:none;"></div>
+	<div class="za" id="za20" style="display:none;"></div>
+	<div class="za" id="za21" style="display:none;"></div>
+	<div class="za" id="za22" style="display:none;"></div>
+	<div class="za" id="za23" style="display:none;"></div>
+	<div class="za" id="za24" style="display:none;"></div>
+	<div class="tree" id="tree2"><img src="./gamepic/tree.jpg" width="40" height="500"/></div>
+	
+	<div id="car" style="z-index:-1;"><img src="./gamepic/car1.jpg" width="20" height="20"/></div>
+	<div style="font-size:12px;position:absolute;top:350px;"><p><button onclick="stop()" class="btn" id="stop">暂停 (space)</button>&nbsp;&nbsp;&nbsp;&nbsp;得分：<span id="score">0</span></p></div>
+
+	</div>
+	
+	
+<script type="text/javascript">
+	var addzatimer;
+	var runningtimer;
+	var speed=50		//控制赛车速度
+	var stopor=true;	//控制游戏暂停
+	var uploader=true;	//控制游戏暂停
+	var m=0;			//记分
+	var ajaxm=0;
+	var carnum=8;		//初始化障碍赛车的数量
+	var str;			//排名信息
+	var car=document.getElementById('car');
+	
+	//设置障碍汽车起始位置
+	for(var i=1;i<=8;i++){
+		var za=document.getElementById('za'+i);
+		za.style.left=((i-1)*20+40)+"px";
+		var za1=document.getElementById('za'+(i+8));
+		za1.style.left=((i-1)*20+40)+"px";
+		var za2=document.getElementById('za'+(i+16));
+		za2.style.left=((i-1)*20+40)+"px";
+	}
+	
+	//控制赛车移动
+	function move(evt){
+		var event=evt || window.event;
+		switch(event.keyCode){
+			//左
+			case 37:
+				car.style.left=Math.max((car.offsetLeft-20),40)+"px";
+				break;
+			//右
+			case 39:
+				car.style.left=Math.min((car.offsetLeft+20),180)+"px";
+				break;
+			//上
+			case 38:
+				car.style.top=Math.max((car.offsetTop-20),0)+"px";
+				break;
+			//下
+			case 40:
+				car.style.top=Math.min((car.offsetTop+20),330)+"px";
+				break;
+			
+			//暂停
+			case 32:
+				//根据小车的状态判断游戏是否开始
+				if(car.style.zIndex=='1'){
+					stop();
+				}
+				break;
+			//开始
+			case 13:
+				if(car.style.zIndex=='-1'){
+					start();
+				}
+				break;
+		}
+	}
+	window.onkeydown=move;
+	
+	//游戏主程序
+	function running(){
+		//记分
+		m+=1;
+		document.getElementById('score').innerHTML=m;
+		if(m==200){
+			carnum=16;
+		}
+		if(m==400){
+			carnum=24;
+		}
+		for(var j=1;j<=carnum;j++){
+			var za=document.getElementById('za'+j);
+			
+			if(za.style.display=='block'){
+				za.style.top=Math.min((za.offsetTop+8),330)+"px";
+			}
+			if(za.style.top=="330px"){
+				za.style.top="0px"
+				za.style.display='none';
+			}
+			//验证是否碰撞
+			if(yz(car,za)){
+				over();
+			}
+		}
+	}
+	
+	
+	
+	//添加障碍
+	function addza(){
+		if(m>200 && m<204){
+			carnum=16;
+			speed=40;
+			clearInterval(runningtimer);
+			runningtimer=setInterval(running,speed);
+		}
+		if(m>400 && m<404){
+			carnum=24;
+			speed=30;
+			clearInterval(runningtimer);
+			runningtimer=setInterval(running,speed);
+		}
+		if(m>600 && m<604){
+			speed=20;
+			clearInterval(runningtimer);
+			runningtimer=setInterval(running,speed);
+		}
+		var i=Math.ceil(Math.random()*carnum);
+		var za=document.getElementById('za'+i);
+		if(za.style.display=='none'){
+			
+			za.style.display='block';
+			//随机颜色
+			za.style.backgroundImage='url(./gamepic/car'+(Math.ceil(Math.random()*4)+1)+'.jpg)';
+		}
+	}
+	
+	
+	//碰撞检测
+	function yz(m,z){
+		var my=m.offsetTop;
+		var mx=m.offsetLeft;
+		var zy=z.offsetTop;
+		var zx=z.offsetLeft;
+		if(my-zy<=20 && my-zy>=-20 && zx-mx==0){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
+	//开始游戏
+	function start(){
+		//初始化赛车数量
+		chis();
+		//开启上传
+		uploader=true;
+		carnum=8;
+		document.getElementById('start').style.display='none';
+		document.getElementById('over').style.display='none';
+		document.getElementById('tree1').style.zIndex='1';
+		document.getElementById('tree2').style.zIndex='1';
+		car.style.zIndex='1';
+		car.style.top='330px';
+		car.style.left='120px';
+		addzatimer=setInterval(addza,100);
+		runningtimer=setInterval(running,speed);
+	}
+	//暂停游戏
+	function stop(){
+		if(stopor){
+			clearInterval(addzatimer);
+			clearInterval(runningtimer);
+			document.getElementById('stop').innerHTML="开始 (space)";
+			stopor=false;
+		}else{
+			document.getElementById('stop').innerHTML="暂停 (space)";
+			addzatimer=setInterval(addza,100);
+			runningtimer=setInterval(running,speed);
+			stopor=true;
+		}
+	}
+	
+	//游戏结束
+	function over(){
+		document.getElementById('paim').innerHTML='';
+		document.getElementById('tree1').style.zIndex='-1';
+		document.getElementById('tree2').style.zIndex='-1';
+		car.style.zIndex='-1';
+		document.getElementById('over').style.display='block';
+		clearInterval(addzatimer);
+		clearInterval(runningtimer);
+		for(var i=1;i<=carnum;i++){
+			var za=document.getElementById('za'+i);
+			za.style.display='none';
+			za.style.top='0px';
+		}
+		document.getElementById('score1').innerHTML=m;
+		ajaxm=m;
+		//初始化速度和分数
+		m=0;
+		speed=50;
+	}
+	
+	//AJAX
+	function upload(){
+		if(uploader){
+			//获取姓名
+			var name=document.getElementById('name').value;
+			if(name==''){
+				alert('姓名不能为空！');
+				return;
+			}
+			if(name.length>8){
+				alert('姓名长度不要超过8位');
+				return;
+			}
+			//创建Ajax请求对象
+			var xmlhttp;
+			if (window.XMLHttpRequest){
+				xmlhttp=new XMLHttpRequest();
+			}else{
+				xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+			}
+			
+			//设置回调函数
+			xmlhttp.onreadystatechange=function(){
+				if(xmlhttp.readyState==4 && xmlhttp.status==200){
+					//获取ajax获取的值
+					info = xmlhttp.responseText;
+					if(info!=''){
+						//重新加载成绩
+						paim();
+						document.getElementById('paim').innerHTML='<b><span style="color:#B91D47;">'+info+'</span></b><br/><br/>'+str;
+					}else{
+						document.getElementById('paim').innerHTML='<b><span>没有进入排行榜，继续加油哦。</span></b><br/><br/>'+str;
+					}
+				}
+			}
+			
+			//初始化
+			xmlhttp.open("get","action.php?name="+name+"&score="+ajaxm,true);//get请求，true表示异步
+			
+			//执行发送
+			xmlhttp.send();
+			uploader=false;
+		}else{
+			alert('不能多次上传！');
+		}
+	}
+	
+	//加载排名信息
+	function paim(){
+		var xmlhttp;
+		if (window.XMLHttpRequest){
+			xmlhttp=new XMLHttpRequest();
+		}else{
+			xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		xmlhttp.onreadystatechange=function(){
+			if(xmlhttp.readyState==4 && xmlhttp.status==200){
+				data = xmlhttp.responseText;
+				eval('var info='+data+';');
+				//排名信息
+				str='<table border="1" align="center" cellspacing="0" cellpadding="0">';
+				for(var i=0;i<info.length;i++){
+					str+='<tr><td>'+(i+1)+'</td><td>'+info[i][1]+'</td><td>'+info[i][0]+'</td></tr>';
+				}
+				str+='</table>';
+				document.getElementById('list').innerHTML=str;
+			}
+		}
+		xmlhttp.open("get","score.php",false);
+		xmlhttp.send();
+	}
+	window.onload=paim;
+	
+	//记录游戏次数
+	function chis(){
+		var xmlhttp;
+		if (window.XMLHttpRequest){
+			xmlhttp=new XMLHttpRequest();
+		}else{
+			xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		xmlhttp.open("get","time.php",true);
+		xmlhttp.send();
+	}
+	
+</script>
+</body>
+<html>
