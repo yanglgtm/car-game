@@ -13,7 +13,7 @@ for($i=0;$i<count($everyscore);$i++){
 		for($i;$i<(count($everyscore)-1);$i++){
 			$arr[]=$everyscore[$i];
 		}
-		echo '真厉害，您进入了排行榜！';
+		echo '真厉害，你进入了排行榜！';
 		break;
 	}else{
 		$arr[]=$everyscore[$i];
