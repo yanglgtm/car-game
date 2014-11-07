@@ -1,4 +1,4 @@
-cargame
+CarGame
 =======
 * 使用JavaScript DOM编写的赛车小游戏，同时使用了AJAX和PHP实现了积分排名的功能。
 
